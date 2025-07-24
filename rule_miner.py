@@ -112,9 +112,16 @@ class RuleMiner(object):
 
         rules = self.get_association_rules(df_encoded)
 
+        seen = set()
+
         for rule in rules:
             X, y = rule
             if consequent_col in str(y) and not any(consequent_col in str(x) for x in X):
                 confidence = self.get_confidence(df_encoded, [X, y])
+
+                rule_key = (tuple(sorted(X)) if isinstance(X, list) else (X,), y)
+                if rule_key in seen:
+                    continue
+                seen.add(rule_key)
                 antecedent = " + ".join(X) if isinstance(X, list) else str(X)
                 print(f"IF {antecedent} → THEN {y} | Confidence: {confidence:.2f}")
